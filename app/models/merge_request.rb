@@ -1876,7 +1876,7 @@ class MergeRequest < ApplicationRecord
   end
 
   def allows_multiple_reviewers?
-    false
+    true
   end
 
   def supports_assignee?
