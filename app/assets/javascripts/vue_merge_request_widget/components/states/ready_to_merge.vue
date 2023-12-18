@@ -146,6 +146,9 @@ export default {
       return this.mr.isPipelineFailed;
     },
     isMergeAllowed() {
+      if (!this.mr.isApproved) {
+        return false;
+      }
       if (this.glFeatures.mergeRequestWidgetGraphql) {
         return this.state.mergeable || false;
       }

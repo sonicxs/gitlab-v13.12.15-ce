@@ -4,6 +4,8 @@ import { statusBoxState } from '~/issuable/components/status_box.vue';
 import { formatDate } from '../../lib/utils/datetime_utility';
 import { MTWPS_MERGE_STRATEGY, MT_MERGE_STRATEGY, MWPS_MERGE_STRATEGY } from '../constants';
 import { stateKey } from './state_maps';
+import { getSidebarOptions } from '~/sidebar/mount_sidebar';
+import Mediator from '~/sidebar/sidebar_mediator';
 
 export default class MergeRequestStore {
   constructor(data) {
@@ -14,6 +16,8 @@ export default class MergeRequestStore {
     this.apiApprovePath = data.api_approve_path;
     this.apiUnapprovePath = data.api_unapprove_path;
     this.hasApprovalsAvailable = data.has_approvals_available;
+
+    this.mediator = new Mediator(getSidebarOptions());
 
     this.setPaths(data);
 
@@ -329,10 +333,49 @@ export default class MergeRequestStore {
   initApprovals() {
     this.isApproved = this.isApproved || false;
     this.approvals = this.approvals || null;
+    this.setApprovedByReviewer();
   }
 
   setApprovals(data) {
     this.approvals = data;
     this.isApproved = data.approved || false;
+    this.setApprovedByReviewer();
   }
+
+  showApprove() {
+    return !this.approvals.user_has_approved && this.approvals.user_can_approve && this.isOpen;
+  }
+
+  showUnapprove() {
+    return this.approvals.user_has_approved && !this.approvals.user_can_approve && this.state !== 'merged';
+  }
+
+  setApprovedByReviewer() {
+    let isAllApproved = true;
+    if (this.mediator) {
+      const reviewers = this.mediator.store.reviewers;
+      if ( reviewers.length >= 1 && this.approvals) {
+        // console.log("currentUserId:" + this.currentUserId +", showUnapprove:"+ this.showUnapprove() +", showApprove:"+ this.showApprove());
+        for (let i = 0; i < reviewers.length; i++) {
+          console.log(reviewers[i].name + ", id:" + reviewers[i].id +", approved:"+ reviewers[i].approved +", reviewed:"+ reviewers[i].reviewed);
+          // approve后mediator.store.reviewers不会刷新，如果自己approve了，则修正状态，其他人approve了则还需要手动刷新页面.
+          if (this.currentUserId === reviewers[i].id) {
+            if (this.showApprove() == true) {
+              isAllApproved = false;
+              break;
+            }
+          } else if (!reviewers[i].approved) {
+            isAllApproved = false;
+            break;
+          }
+        }
+      } else {
+        console.log("reviewers or approvals is null");
+      }
+    } else {
+      console.log("mediator is null");
+    }
+    this.isApproved = isAllApproved || false;
+  }
+
 }
