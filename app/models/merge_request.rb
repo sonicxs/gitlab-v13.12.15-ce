@@ -236,6 +236,7 @@ class MergeRequest < ApplicationRecord
     # rubocop: enable CodeReuse/ServiceClass
 
     def check_state?(merge_status)
+      # Rails.logger.warn("mfptest2 check_state, merge_status: #{merge_status.to_sym}")
       [:unchecked, :cannot_be_merged_recheck, :checking, :cannot_be_merged_rechecking].include?(merge_status.to_sym)
     end
   end
@@ -1868,6 +1869,9 @@ class MergeRequest < ApplicationRecord
       metrics_record.target_project_id = target_project_id
       metrics_record.association(:merge_request).target = self
       association(:metrics).target = metrics_record
+
+      # Rails.logger.warn("mfptest2 merge_request.rb ensure_metrics, context_commits_count:#{self.context_commits_count}, commits_count:#{self.commits_count}")
+
     end
   end
 

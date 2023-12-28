@@ -60,6 +60,7 @@ module API
           unauthorized! unless success
 
           present_approval(merge_request)
+          # Rails.logger.warn("mfptest2 merge_request_approvals.rb post approve")
         end
 
         desc 'Remove an approval from a merge request'
@@ -73,6 +74,7 @@ module API
           not_found! unless success
 
           present_approval(merge_request)
+          # Rails.logger.warn("mfptest2 merge_request_approvals.rb post unapprove")
         end
       end
     end

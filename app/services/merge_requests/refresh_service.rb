@@ -46,7 +46,7 @@ module MergeRequests
         execute_mr_web_hooks(mr)
         merge_request_activity_counter.track_mr_including_ci_config(user: mr.author, merge_request: mr)
       end
-
+      # Rails.logger.warn("mfptest2 refresh_service.rb, refresh_merge_requests")
       true
     end
 
@@ -137,6 +137,24 @@ module MergeRequests
         end
 
         merge_request.mark_as_unchecked
+        Rails.logger.warn("mfptest2 refresh_service.rb, reload_merge_requests: #{merge_request.iid} do mark_as_unchecked, reviewers:#{merge_request.reviewers.length}, approvals:#{merge_request.approvals.length}")
+
+        merge_request.reviewers.each do |item|
+          Rails.logger.warn("mfptest2 refresh_service.rb, reload_merge_requests: reviewers: #{item.name}, #{item.username} , state:#{item.state}, merge_request_reviewers:#{item.merge_request_reviewers.length}")
+        end
+
+        # if merge_request.approvals.length != 0
+        #   Rails.logger.warn("mfptest2 refresh_service.rb, reload_merge_requests: approvals.reset")
+        #   # merge_request.approvals.reset #没有效果
+        # end
+
+        merge_request.approvals.each do |item2|
+          user = User.find_by(id:item2.user_id)
+          Rails.logger.warn("mfptest2 refresh_service.rb, reload_merge_requests: approvals:#{user.username}, id:#{item2.user_id}, ")
+          status_result = ::MergeRequests::RemoveApprovalService.new(project: merge_request.target_project, current_user: user).execute(merge_request)
+          Rails.logger.warn("mfptest2 refresh_service.rb, reload_merge_requests: do RemoveApprovalService: #{status_result[:status]}")
+        end
+
       end
 
       # Upcoming method calls need the refreshed version of
