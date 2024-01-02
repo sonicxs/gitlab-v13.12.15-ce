@@ -150,9 +150,11 @@ module MergeRequests
 
         merge_request.approvals.each do |item2|
           user = User.find_by(id:item2.user_id)
-          Rails.logger.warn("mfptest2 refresh_service.rb, reload_merge_requests: approvals:#{user.username}, id:#{item2.user_id}, ")
-          status_result = ::MergeRequests::RemoveApprovalService.new(project: merge_request.target_project, current_user: user).execute(merge_request)
-          Rails.logger.warn("mfptest2 refresh_service.rb, reload_merge_requests: do RemoveApprovalService: #{status_result[:status]}")
+          if user.present?
+            Rails.logger.warn("mfptest2 refresh_service.rb, reload_merge_requests: approvals:#{user.username}, id:#{item2.user_id}, ")
+            status_result = ::MergeRequests::RemoveApprovalService.new(project: merge_request.target_project, current_user: user).execute(merge_request)
+            Rails.logger.warn("mfptest2 refresh_service.rb, reload_merge_requests: do RemoveApprovalService: #{status_result[:status]}")
+          end
         end
 
       end

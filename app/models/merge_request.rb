@@ -236,7 +236,7 @@ class MergeRequest < ApplicationRecord
     # rubocop: enable CodeReuse/ServiceClass
 
     def check_state?(merge_status)
-      # Rails.logger.warn("mfptest2 check_state, merge_status: #{merge_status.to_sym}")
+      # Rails.logger.warn("mfptest2 merge_request.rb, check_state: merge_status: #{merge_status.to_sym}")
       [:unchecked, :cannot_be_merged_recheck, :checking, :cannot_be_merged_rechecking].include?(merge_status.to_sym)
     end
   end
@@ -1049,6 +1049,7 @@ class MergeRequest < ApplicationRecord
   def check_mergeability(async: false)
     return unless recheck_merge_status?
 
+    Rails.logger.warn("mfptest2 merge_request.rb check_mergeability")
     check_service = MergeRequests::MergeabilityCheckService.new(self)
 
     if async
@@ -1066,6 +1067,7 @@ class MergeRequest < ApplicationRecord
   # Returns boolean indicating the merge_status should be rechecked in order to
   # switch to either can_be_merged or cannot_be_merged.
   def recheck_merge_status?
+    Rails.logger.warn("mfptest2 merge_request.rb recheck_merge_status? : #{merge_status}")
     self.class.state_machines[:merge_status].check_state?(merge_status)
   end
 
